@@ -1,14 +1,13 @@
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
 export default async function handler(req, res) {
   try {
-    const completion = await openai.createChatCompletion({
-      model: "gpt-4",  // 或 "gpt-3.5-turbo" 睇你用邊個
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // 或者 gpt-4o, gpt-3.5-turbo
       messages: [
         {
           role: "system",
@@ -17,23 +16,27 @@ export default async function handler(req, res) {
 - 三個提示（只有一個與該詞語有關）
 - 詞語解釋
 
-格式如下：
+輸出 JSON 格式如下：
 {
-  "term": "XXX",
+  "term": "詞語",
   "hints": ["提示A", "提示B", "提示C"],
   "explanation": "詞語詳細解釋"
 }`
         },
-        { role: "user", content: "請幫我生成一張卡牌。" }
+        {
+          role: "user",
+          content: "請幫我生成一張卡牌。"
+        }
       ],
       temperature: 0.8,
     });
 
-    const text = completion.data.choices[0].message.content;
+    const text = completion.choices[0].message.content.trim();
+
     // 嘗試轉成 JSON
     const data = JSON.parse(text);
-
     res.status(200).json(data);
+
   } catch (error) {
     console.error("API error:", error);
     res.status(500).json({ error: "Failed to generate card" });
