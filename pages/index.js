@@ -3,8 +3,8 @@ import { useState } from 'react';
 export default function Home() {
   const [card, setCard] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [newCardsCount, setNewCardsCount] = useState(0);
 
+  // 抽取隨機卡牌，純粹讀取 Supabase
   const drawRandomCard = async () => {
     setLoading(true);
     try {
@@ -15,7 +15,6 @@ export default function Home() {
         alert(data.error);
       } else {
         setCard(data.randomCard);
-        setNewCardsCount(data.newCardsAdded);
       }
     } catch (err) {
       console.error(err);
@@ -28,6 +27,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50">
       <h1 className="text-3xl font-bold mb-4">9upper Random Card</h1>
+
       <button
         onClick={drawRandomCard}
         disabled={loading}
@@ -48,10 +48,6 @@ export default function Home() {
             <summary className="cursor-pointer text-blue-500">Show explanation</summary>
             <p className="mt-2">{card.explanation}</p>
           </details>
-
-          <p className="mt-4 text-green-600">
-            🎉 {newCardsCount} new cards were generated and added to Supabase!
-          </p>
         </div>
       )}
     </div>
