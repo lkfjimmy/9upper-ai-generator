@@ -12,51 +12,50 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// API Route
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed, only POST." });
   }
 
   try {
-    const { count = 5 } = req.body; // 一次生成幾張卡，預設 5 張
+    const { count = 5 } = req.body; // 一次生成的卡牌數量，默認 5
 
-    // ===== Prompt：生成 9upper 專用卡牌 =====
+    // Prompt
     const prompt = `
-你是一個為社交推理遊戲「9upper」生成卡牌的專家。
-請生成 ${count} 張全新卡牌，內容需冷門且有趣，不能太容易猜中。
-每張卡包含以下欄位，並以 JSON 陣列輸出，不包含其他文字：
+你是一個專門為社交推理遊戲「9upper」生成卡牌的設計專家。
 
+請生成 ${count} 張全新卡牌，每張卡牌需以純 JSON 陣列輸出，不能包含任何多餘的文字或註解。
+
+JSON 結構：
 [
   {
-    "term": "核心詞語，簡短，盡量冷門",
+    "term": "詞語，冷門專有名詞，來源於網絡、次文化、歷史、文學、天文或其他冷門科學，日常生活中不會見到",
     "hints": [
-      "提示 1，由淺入深",
-      "提示 2",
-      "提示 3"
+      "提示1：單一名詞，可能正確，也可能完全無關",
+      "提示2：單一名詞，可能正確，也可能完全無關",
+      "提示3：單一名詞，可能正確，也可能完全無關"
     ],
-    "explanation": "詞語的簡短解釋，讓主持人理解但不會直接暴雷。"
+    "explanation": "簡短解釋，清楚描述詞語真正的來源和含義，方便主持人理解，但不直接暴露答案。"
   }
 ]
 
-生成規則：
-1. 提示從模糊到明確，逐步縮小範圍。
-2. 詞語要有文化或知識深度，不限於熱門名詞。
-3. 不能包含色情、仇恨、政治敏感或違法內容。
-4. JSON 必須完全正確，不可包含任何多餘文字或註解。
+### 規則：
+1. 詞語 (term) 必須非常冷門，不出現在日常生活中。
+2. 三個提示為單一名詞，其中只有一個正確且與詞語真實相關，另外兩個必須完全無關。
+3. 僅能輸出 JSON，不能有額外說明或符號。
 `;
 
     // 呼叫 OpenAI
     const aiResponse = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: "你是9upper卡牌生成專家，負責提供高品質詞語與提示。" },
+        { role: "system", content: "你是9upper卡牌生成專家。" },
         { role: "user", content: prompt },
       ],
       temperature: 0.9,
     });
 
-    // 嘗試解析 AI 回傳的 JSON
+    // 嘗試解析 AI 輸出
     let generatedCards;
     try {
       generatedCards = JSON.parse(aiResponse.choices[0].message.content.trim());
@@ -65,8 +64,8 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Failed to parse AI output as JSON." });
     }
 
-    // 將生成的卡牌插入 Supabase
-    const { data, error } = await supabase.from("cards").insert(
+    // 插入 Supabase
+    const { error } = await supabase.from("cards").insert(
       generatedCards.map((card) => ({
         term: card.term,
         hints: card.hints,
