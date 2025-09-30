@@ -43,22 +43,22 @@ export default async function handler(req, res) {
    - **只有其中一個提示詞與該詞語真正相關**，另外兩個完全無關。
    - 提示需模糊、含蓄，不會直接透露答案。
 
-3. 解釋 (explanation)：
-   - 以 1~2 句話描述該詞語的真實意思。
-   - 包含詞語的來源、文化背景或使用場合，讓玩家閱讀後能獲得知識或趣味。
-
-4. 難度 (difficulty)：
+3. 難度 (difficulty)：
    - 請為每張卡牌分配一個難度等級：
      1 = 容易（冷門度較低，仍可能有部分人知道）
      2 = 中等（一般大眾幾乎不認識，但有專業/次文化人群可能知道）
      3 = 困難（極冷門，只有少數專家或深度愛好者知道）
 
+4. 解釋 (explanation)：
+   - 以 1~2 句話描述該詞語的真實意思。
+   - 包含詞語的來源、文化背景或使用場合，讓玩家閱讀後能獲得知識或趣味。
+
 請將輸出格式化為 **純 JSON 陣列**，不包含多餘文字或註解，每張卡牌的格式如下：
 {
   "term": "",
   "hints": ["", "", ""],
-  "explanation": "",
-  "difficulty": 1
+  "difficulty": 1,
+  "explanation": ""
 }
 `;
 
@@ -86,8 +86,8 @@ export default async function handler(req, res) {
       generatedCards.map((card) => ({
         term: card.term,
         hints: card.hints,
-        explanation: card.explanation,
         difficulty: card.difficulty,
+        explanation: card.explanation,
       }))
     );
 
