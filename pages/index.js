@@ -4,14 +4,13 @@ export default function Home() {
   const [card, setCard] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // helper function：將 popularity 數字轉成星星難度
-  const renderDifficulty = (popularity) => {
-    if (!popularity) return null;
-    const stars = "★".repeat(popularity) + "☆".repeat(3 - popularity);
-    return stars;
+  // 將數字難度轉成星星字串
+  const renderStars = (difficulty) => {
+    if (!difficulty) return '';
+    return '★'.repeat(difficulty) + '☆'.repeat(3 - difficulty);
   };
 
-  // 抽取隨機卡牌
+  // 抽取隨機卡牌，純粹讀取 Supabase
   const drawRandomCard = async () => {
     setLoading(true);
     try {
@@ -45,19 +44,18 @@ export default function Home() {
 
       {card && (
         <div className="mt-6 p-4 border rounded bg-white shadow max-w-md">
-          <h2 className="text-xl font-semibold mb-2">{card.term}</h2>
-          
-          {/* 難度顯示 */}
-          <p className="text-sm text-gray-600 mb-2">
-            難度：{renderDifficulty(card.popularity)}
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-semibold">{card.term}</h2>
+            <span className="text-yellow-500 font-bold">
+              {renderStars(card.difficulty)}
+            </span>
+          </div>
 
           <ul className="list-disc list-inside mb-2">
             {card.hints.map((hint, idx) => (
               <li key={idx}>{hint}</li>
             ))}
           </ul>
-
           <details>
             <summary className="cursor-pointer text-blue-500">Show explanation</summary>
             <p className="mt-2">{card.explanation}</p>
