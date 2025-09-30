@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     try {
       const { data, error } = await supabase
         .from('cards')
-        .insert([{ term, hints, explanation, difficulty }]);
+        .insert([{ term, hints, difficulty, explanation }]);
 
       if (error) throw error;
       res.status(201).json(data[0]);
@@ -19,4 +19,5 @@ export default async function handler(req, res) {
     res.status(405).json({ error: "Method not allowed" });
   }
 }
+
 
